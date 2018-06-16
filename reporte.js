@@ -1,5 +1,5 @@
 class Reporte{
-    constructor(pFbkey,pNombre, pApellido, pTelefono, pEmail, pCedula, pReporteLlamada, pFecha, pAutor){
+    constructor(pFbkey,pNombre, pApellido, pTelefono, pEmail, pCedula, pReporteLlamada, pFecha, pAutor, pEditable){
         this.fbkey = pFbkey;
         this.nombre = pNombre;
         this.apellido = pApellido;
@@ -9,6 +9,7 @@ class Reporte{
         this.reporteLlamada = pReporteLlamada;
         this.estado = 'Pendiente';
         this.autor = pAutor;
+        this.editable = pEditable;
         if (pFecha === null) {
             this.fecha = new Date();
         } else {

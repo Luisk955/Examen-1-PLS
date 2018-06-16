@@ -19,9 +19,7 @@ class ReporteUI {
         this.container.appendChild(this.estadoTxt);
         this.container.classList.add("container");
         this.nombreTxt.classList.add("h2");
-
-        
-
+        this.container.classList.add("containerReportes");
 
         if (this.reporte !== null) {
             this.nombreTxt.innerText = this.reporte.nombre + " " + this.reporte.apellido;

@@ -1,3 +1,17 @@
 /* html {
     font-size: 1rem;
   } */
+
+p {
+  margin-top: 4%;
+  user-select: none;
+  pointer-events: none;
+}
+
+.containerReportes {
+  background-color: aliceblue;
+}
+
+.selectedReporte {
+  background-color: blanchedalmond;
+}
