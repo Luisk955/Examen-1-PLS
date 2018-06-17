@@ -16,4 +16,7 @@ class Reporte{
             this.fecha = new Date(pFecha);
         }
     }
+    setEstado(pEstado){
+        this.estado = pEstado;
+    }
 }

@@ -14,18 +14,24 @@ function init() {
     var btnEditar = document.getElementById('btnEditar');
     var btnEliminar = document.getElementById('btnEliminar');
     var btnCancelar = document.getElementById('btnCancelar');
+    var pEstadoReporte = document.getElementById('pEstadoReporte');
+    var divEstadoRep = document.getElementById('divEstadoRep');
+    var btnCambiarEstado = document.getElementById('btnCambiarEstado');
     var reportes = [];
-    var autor = 'Luisk';
+    var autor = 'TRY';
     var selectedReporteUI = null;
 
     btnEditar.hidden = true;
     btnEliminar.hidden = true;
     btnCancelar.hidden = true;
+    divEstadoRep.hidden = true;
 
 
     btnGuardar.onclick = crearReporte;
     btnEditar.onclick = editarReporte;
     btnEliminar.onclick = eliminarReporte;
+    btnCambiarEstado.onclick = cambiarEstadoReporte;
+
     // btnCancelar.onclick = cancelar;
 
 
@@ -51,11 +57,8 @@ function init() {
                 var reportesData = JSON.parse(request.responseText);
                 for (const key in reportesData) {
                     var reporteData = reportesData[key];
-                    var editable = false;
-                    if (reporteData.autor === autor) {
-                        editable = true;
-                    }
-                    var reporte = new Reporte(key, reporteData.nombre, reporteData.apellido, reporteData.telefono, reporteData.email, reporteData.cedula, reporteData.reporteLlamada, reporteData.fecha, reporteData.autor, editable);
+                    var reporte = new Reporte(key, reporteData.nombre, reporteData.apellido, reporteData.telefono, reporteData.email, reporteData.cedula, reporteData.reporteLlamada, reporteData.fecha, reporteData.autor, reporteData.editable);
+                    reporte.setEstado(reporteData.estado);
                     reportes.push(reporte);
                 }
                 mostrarReportes();
@@ -70,9 +73,7 @@ function init() {
         reportesCont.innerHTML = "";
         reportes.forEach(reporte => {
             var reporteUI = new ReporteUI(reporte);
-            if (reporteUI.reporte.editable) {
-                reporteUI.container.onclick = selectReporte;
-            }
+            reporteUI.container.onclick = selectReporte;
 
             reportesCont.appendChild(reporteUI.container);
             console.log(reportes);
@@ -150,6 +151,57 @@ function init() {
         }
     }
 
+    function cambiarEstadoReporte() {
+        var request = new XMLHttpRequest();
+        request.open('PATCH', urlBase, true);
+        request.onreadystatechange = cambiarEstadoReporteCallback;
+        request.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
+        var reporte = selectedReporteUI.reporte;
+        var fbkey = reporte.fbkey;
+        var fecha = new Date();
+        reporte.fecha = fecha;
+        reporte.fbkey = null;
+
+        if (reporte.estado === 'Pendiente') {
+
+            reporte.estado = 'Resuelto';
+
+            var reporteJson = '{' + JSON.stringify(fbkey) + ':' + JSON.stringify(reporte) + '}';
+
+            console.log(reporteJson);
+            request.send(reporteJson);
+            removeSelectedReportStyle();
+            cleanUI();
+
+        } else if (reporte.estado === 'Resuelto') {
+            if (reporte.autor === autor) {
+                reporte.estado = 'Pendiente';
+                var reporteJson = '{' + JSON.stringify(fbkey) + ':' + JSON.stringify(reporte) + '}';
+
+                console.log(reporteJson);
+                request.send(reporteJson);
+                removeSelectedReportStyle();
+                cleanUI();
+            } else {
+                console.log('Permiso denegado.');
+            }
+        } else {
+            console.log('Permiso denegado.');
+        }
+
+    }
+
+    function cambiarEstadoReporteCallback(event) {
+        var request = event.target;
+        if (request.readyState === XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                requestAllReportes();
+            } else {
+                console.log('Error on request: ', request.status);
+            }
+        }
+    }
+
     //update reports
 
 
@@ -162,7 +214,7 @@ function init() {
             request.open('Delete', url, true);
             request.onreadystatechange = eliminarReporteCallback;
             request.send();
-            // removeSelectedReportStyle();
+            removeSelectedReportStyle();
             cleanUI();
         }
     }
@@ -190,10 +242,12 @@ function init() {
         txtTelefono.value = '';
         txtCedula.value = '';
         txtReporte.value = '';
-    } 
+        pEstadoReporte.innerHTML = '';
+
+    }
 
     function selectReporte(event) {
-        // removeSelectedReportStyle();
+        removeSelectedReportStyle();
         if (event.target.reporte) {
             selectedReporteUI = event.target;
             txtNombre.value = selectedReporteUI.reporte.nombre;
@@ -203,19 +257,39 @@ function init() {
             txtCedula.value = selectedReporteUI.reporte.cedula;
             txtReporte.value = selectedReporteUI.reporte.reporteLlamada;
             btnEditar.hidden = false;
-            btnEliminar.hidden = false;
+            divEstadoRep.hidden = false;
             btnCancelar.hidden = false;
+            btnCambiarEstado.hidden = false;
             btnGuardar.hidden = true;
+            pEstadoReporte.innerHTML = "Estado de la llamada: " + selectedReporteUI.reporte.estado;
+
+            if (selectedReporteUI.reporte.estado === 'Resuelto') {
+                btnEliminar.hidden = false;
+                btnCambiarEstado.hidden = true;
+                if (selectedReporteUI.reporte.autor === autor) {
+                    btnCambiarEstado.hidden = false;
+                }
+                else{
+                    btnEditar.hidden = true;
+
+                }
+            }
+
             selectedReporteUI.classList.add('selectedReporte');
         }
     }
 
-    function removeSelectedReportStyle(event) {
-        selectedReporteUI.classList.remove('selectedReporte');
-        btnCancelar.hidden = true;
-        btnEditar.hidden = true;
-        btnCancelar.hidden = true;
-        btnGuardar.hidden = false;
+    function removeSelectedReportStyle() {
+        if (selectedReporteUI != null) {
+            selectedReporteUI.classList.remove('selectedReporte');
+            btnCancelar.hidden = true;
+            btnEditar.hidden = true;
+            btnEliminar.hidden = true;
+            btnCancelar.hidden = true;
+            btnCambiarEstado.hidden = true;
+            divEstadoRep.hidden = true;
+            btnGuardar.hidden = false;
+        }
     }
 
     //styles

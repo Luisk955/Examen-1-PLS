@@ -27,7 +27,7 @@ class ReporteUI {
             this.telefonoTxt.innerText = this.reporte.telefono;
             this.cedulaTxt.innerText = this.reporte.cedula;
             this.reporteTxt.innerText = this.reporte.reporteLlamada;
-            this.timeStampTxt.innerText = "Hecho por " + this.reporte.autor + " - " + this.reporte.fecha.getDate() + "/" + this.reporte.fecha.getMonth() + "/" + this.reporte.fecha.getFullYear() + " "+ this.reporte.fecha.getHours()+ ":" + this.reporte.fecha.getMinutes();
+            this.timeStampTxt.innerText = "Hecho por " + this.reporte.autor + " - " + this.reporte.fecha.getDate() + "/" + (this.reporte.fecha.getMonth()+1) + "/" + this.reporte.fecha.getFullYear() + " "+ this.reporte.fecha.getHours()+ ":" + this.reporte.fecha.getMinutes();
             this.estadoTxt.innerText = this.reporte.estado;
         }
         this.container.reporte = this.reporte;
